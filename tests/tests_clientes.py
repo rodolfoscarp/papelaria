@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
-from .models import Cliente
+from cliente.models import Cliente
 from django.forms.models import model_to_dict
 
 from faker import Faker
@@ -148,8 +148,10 @@ class ListClienteTests(APITestCase):
 
         clientes.json()
 
+        clientes_result = clientes.json()['results']
+
         self.assertEqual(clientes.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(clientes.json()), 3)
+        self.assertEqual(len(clientes_result), 3)
 
     def test_deve_listar_um_cliente(self):
         cliente1 = Cliente.objects.get(id=1)

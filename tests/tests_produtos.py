@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
-from .models import Produto
+from produto.models import Produto
 from django.forms.models import model_to_dict
 
 

@@ -10,3 +10,4 @@ venv/
 
 # vscode
 .vscode/
+.pytest_cache/

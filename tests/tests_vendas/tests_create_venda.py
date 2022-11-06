@@ -1,11 +1,10 @@
 from rest_framework.test import APIClient
 from django.urls import reverse
-from .dummies import make_cliente, make_produto, make_vendedor
+from ..dummies import make_cliente, make_produto, make_vendedor, make_percentual
 from rest_framework import status
-from ..models import Venda, ItemVenda
+from venda.models import Venda, ItemVenda
 from datetime import datetime
 import pytest
-from .dummies import make_percentual
 
 
 @pytest.mark.django_db

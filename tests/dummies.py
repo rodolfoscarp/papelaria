@@ -1,7 +1,7 @@
 from vendedor.models import Vendedor
 from cliente.models import Cliente
 from produto.models import Produto
-from ..models import Venda, ItemVenda, PercentualComissao
+from venda.models import Venda, ItemVenda, PercentualComissao
 from faker import Faker
 fake = Faker(locale='pt_BR')
 from datetime import datetime

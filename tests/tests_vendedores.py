@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
-from .models import Vendedor
+from vendedor.models import Vendedor
 from django.forms.models import model_to_dict
 from faker import Faker
 
@@ -147,10 +147,10 @@ class ListVendedorTests(APITestCase):
     def test_deve_listar_todos_os_vendedores_cadastrados(self):
         vendedores = self.client.get(self.url)
 
-        vendedores.json()
+        vendedores_result = vendedores.json()['results']
 
         self.assertEqual(vendedores.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(vendedores.json()), 3)
+        self.assertEqual(len(vendedores_result), 3)
 
     def test_deve_listar_um_vendedor(self):
         vendedor = Vendedor.objects.get(id=1)
