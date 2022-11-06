@@ -13,30 +13,32 @@ class Venda(models.Model):
     )
 
     cliente = models.ForeignKey(
-        Cliente, on_delete=models.SET_NULL,
-        blank=True, null=True,
-        related_name='cliente'
+        Cliente, on_delete=models.CASCADE,
+        blank=False, null=False,
+        related_name='compras'
     )
 
     vendedor = models.ForeignKey(
-        Vendedor, on_delete=models.SET_NULL,
-        blank=True, null=True,
-        related_name='vendedor'
+        Vendedor, on_delete=models.CASCADE,
+        blank=False, null=False,
+        related_name='vendas'
     )
 
     def __str__(self) -> str:
         return super().__str__()
 
 
-class ProdutoVenda(models.Model):
+class ItemVenda(models.Model):
     venda = models.ForeignKey(
-        Venda, on_delete=models.SET_NULL,
-        blank=True, null=True
+        Venda, on_delete=models.CASCADE,
+        blank=False, null=False,
+        related_name='items'
     )
 
     produto = models.ForeignKey(
-        Produto, on_delete=models.SET_NULL,
-        blank=True, null=True
+        Produto, on_delete=models.CASCADE,
+        blank=False, null=False,
+        related_name='items'
     )
 
     quantidade = models.PositiveIntegerField(blank=False, null=False)
@@ -46,7 +48,7 @@ class ProdutoVenda(models.Model):
 
     @property
     def comissao(self):
-        return self.quantidade * self.percentual_comissao
+        return self.total_produto * self.percentual_comissao
 
     @property
     def total_produto(self):
@@ -58,13 +60,13 @@ class ProdutoVenda(models.Model):
 
 class PercentualComissao(models.Model):
     class DiaSemana(models.IntegerChoices):
-        DOMINGO = 0
-        SEGUNDA = 1
-        TERCA = 2
-        QUARTA = 3
-        QUINTA = 4
-        SEXTA = 5
-        SABADO = 6
+        SEGUNDA = 0
+        TERCA = 1
+        QUARTA = 2
+        QUINTA = 3
+        SEXTA = 4
+        SABADO = 5
+        DOMINGO = 6
 
     dia_semana = models.IntegerField(
         unique=True, choices=DiaSemana.choices,

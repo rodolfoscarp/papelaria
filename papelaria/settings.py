@@ -134,4 +134,5 @@ PHONENUMBER_DEFAULT_REGION = "BR"
 
 REST_FRAMEWORK = {
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning',
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json'
 }
