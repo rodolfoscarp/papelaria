@@ -6,7 +6,7 @@ from drf_yasg.views import get_schema_view as swagger_get_schema_view
 
 from rest_framework.routers import DefaultRouter
 from cliente.views import ClienteViewSet
-from vendedor.views import VendedorViewSet
+from vendedor.views import VendedorViewSet, ComissaoListView
 from produto.views import ProdutoViewSet
 from venda.views import VendaViewSet
 
@@ -27,7 +27,8 @@ schema_view = swagger_get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
+    path('comissao/', ComissaoListView.as_view(), name='comissao'),
+    path('', include(router.urls)),
     path(
         'doc/', schema_view.with_ui('swagger', cache_timeout=0),
         name='schema-swagger-ui'

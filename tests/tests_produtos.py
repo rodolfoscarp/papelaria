@@ -3,12 +3,12 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from produto.models import Produto
 from django.forms.models import model_to_dict
+from .dummies import make_produto
+
+url = reverse('produto-list')
 
 
 class CreateProdutoTests(APITestCase):
-    def setUp(self) -> None:
-        self.url = reverse('produto-list')
-
     def test_deve_cadastrar_novo_produto(self):
         produto = {
             'valor_unitario': 10.00,
@@ -16,7 +16,7 @@ class CreateProdutoTests(APITestCase):
             'descricao': 'Produto1'
         }
 
-        res = self.client.post(self.url, produto, format='json')
+        res = self.client.post(url, produto, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(produto['descricao'], Produto.objects.get().descricao)
@@ -32,7 +32,7 @@ class CreateProdutoTests(APITestCase):
             'percentual_comissao': 0.02,
         }
 
-        res = self.client.post(self.url, produto)
+        res = self.client.post(url, produto)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -44,7 +44,7 @@ class CreateProdutoTests(APITestCase):
             'descricao': ''
         }
 
-        res = self.client.post(self.url, produto)
+        res = self.client.post(url, produto)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -54,7 +54,7 @@ class CreateProdutoTests(APITestCase):
             'descricao': 'Produto1'
         }
 
-        res = self.client.post(self.url, produto)
+        res = self.client.post(url, produto)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -65,7 +65,7 @@ class CreateProdutoTests(APITestCase):
             'descricao': 'Produto1'
         }
 
-        res = self.client.post(self.url, produto)
+        res = self.client.post(url, produto)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -75,7 +75,7 @@ class CreateProdutoTests(APITestCase):
             'descricao': ''
         }
 
-        res = self.client.post(self.url, produto)
+        res = self.client.post(url, produto)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -85,7 +85,7 @@ class CreateProdutoTests(APITestCase):
             'percentual_comissao': 0,
             'descricao': 'Produto1'}
 
-        res = self.client.post(self.url, produto)
+        res = self.client.post(url, produto)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -96,14 +96,47 @@ class CreateProdutoTests(APITestCase):
             'descricao': 'Produto1'
         }
 
-        res = self.client.post(self.url, produto)
+        res = self.client.post(url, produto)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class ListProdutoTests(APITestCase):
-    pass
+    @classmethod
+    def setUpTestData(cls) -> None:
+        for _ in range(5):
+            make_produto()
+
+    def test_deve_listar_todos_os_produtos_cadastrados(self):
+        produtos = self.client.get(url)
+
+        produtos_result = produtos.json()['results']
+
+        self.assertEqual(produtos.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(produtos_result), 5)
+
+    def test_deve_listar_um_produto(self):
+        produto = Produto.objects.get(codigo=1)
+
+        res = self.client.get(f'{url}1/')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.json(), model_to_dict(produto))
 
 
 class UpdateProdutoTests(APITestCase):
     pass
+
+
+class DeleteProdutoTests(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        make_produto()
+
+    def test_deve_deletar_um_produto(self):
+        res = self.client.delete(url + '1/')
+
+        produtos = Produto.objects.all()
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(produtos), 0)

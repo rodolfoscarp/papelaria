@@ -6,12 +6,13 @@ from venda.models import Venda, ItemVenda
 from datetime import datetime
 import pytest
 
+url = reverse('venda-list')
+
 
 @pytest.mark.django_db
 def test_deve_cadastrar_uma_nova_venda():
-    url = reverse('venda-list')
-    api_client = APIClient()
 
+    api_client = APIClient()
     quantidade_produto = 10
     valor_unitario_produto = 100
     percentual_comissao_produto = 0.01
@@ -57,7 +58,6 @@ def test_deve_cadastrar_uma_nova_venda():
 
 @pytest.mark.django_db
 def test_deve_cadastrar_item_com_percetual_minimo_do_dia_da_semana():
-    url = reverse('venda-list')
     api_client = APIClient()
 
     quantidade_produto = 10
@@ -101,7 +101,6 @@ def test_deve_cadastrar_item_com_percetual_minimo_do_dia_da_semana():
 
 @pytest.mark.django_db
 def test_deve_cadastrar_item_com_percetual_maximo_do_dia_da_semana():
-    url = reverse('venda-list')
     api_client = APIClient()
 
     quantidade_produto = 10

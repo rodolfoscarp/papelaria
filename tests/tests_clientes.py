@@ -3,17 +3,20 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from cliente.models import Cliente
 from django.forms.models import model_to_dict
+from .dummies import make_cliente
 
 from faker import Faker
 
 fake = Faker(locale='pt_BR')
 
 
+url = reverse('cliente-list')
+
+
 class CreateClienteTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.url = reverse('cliente-list')
         cls.nome = fake.name()
         cls.email = fake.email()
         cls.telefone = '(21) 99999-9999'
@@ -25,7 +28,7 @@ class CreateClienteTests(APITestCase):
             telefone=self.telefone,
         )
 
-        res = self.client.post(self.url, cliente, format='json')
+        res = self.client.post(url, cliente, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(cliente['nome'], Cliente.objects.get().nome)
@@ -38,7 +41,7 @@ class CreateClienteTests(APITestCase):
             telefone=self.telefone,
         )
 
-        res = self.client.post(self.url, cliente, format='json')
+        res = self.client.post(url, cliente, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -49,7 +52,7 @@ class CreateClienteTests(APITestCase):
             telefone=self.telefone,
         )
 
-        res = self.client.post(self.url, cliente, format='json')
+        res = self.client.post(url, cliente, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -59,7 +62,7 @@ class CreateClienteTests(APITestCase):
             email=self.email,
         )
 
-        res = self.client.post(self.url, cliente, format='json')
+        res = self.client.post(url, cliente, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -70,7 +73,7 @@ class CreateClienteTests(APITestCase):
             email=self.email,
         )
 
-        res = self.client.post(self.url, cliente, format='json')
+        res = self.client.post(url, cliente, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -81,7 +84,7 @@ class CreateClienteTests(APITestCase):
             telefone='999999999'
         )
 
-        res = self.client.post(self.url, cliente, format='json')
+        res = self.client.post(url, cliente, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -91,7 +94,7 @@ class CreateClienteTests(APITestCase):
             telefone=self.telefone
         )
 
-        res = self.client.post(self.url, cliente, format='json')
+        res = self.client.post(url, cliente, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -102,7 +105,7 @@ class CreateClienteTests(APITestCase):
             email=''
         )
 
-        res = self.client.post(self.url, cliente, format='json')
+        res = self.client.post(url, cliente, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -113,66 +116,42 @@ class CreateClienteTests(APITestCase):
             telefone=self.telefone
         )
 
-        res = self.client.post(self.url, cliente, format='json')
+        res = self.client.post(url, cliente, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class ListClienteTests(APITestCase):
-    def setUp(self) -> None:
-        self.url = reverse('cliente-list')
-        self.cliente1 = dict(
-            nome=fake.name(),
-            email=fake.email(),
-            telefone='(21) 99999-9999'
-        )
-
-        self.cliente2 = dict(
-            nome=fake.name(),
-            email=fake.email(),
-            telefone='(22) 99999-9999'
-        )
-
-        self.cliente3 = dict(
-            nome=fake.name(),
-            email=fake.email(),
-            telefone='(23) 99999-9999'
-        )
-
-        Cliente.objects.create(**self.cliente1)
-        Cliente.objects.create(**self.cliente2)
-        Cliente.objects.create(**self.cliente3)
+    @classmethod
+    def setUpTestData(cls) -> None:
+        for _ in range(5):
+            make_cliente()
 
     def test_deve_listar_todos_os_clientes_cadastrados(self):
-        clientes = self.client.get(self.url)
+        clientes = self.client.get(url)
 
         clientes.json()
 
         clientes_result = clientes.json()['results']
 
         self.assertEqual(clientes.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(clientes_result), 3)
+        self.assertEqual(len(clientes_result), 5)
 
     def test_deve_listar_um_cliente(self):
         cliente1 = Cliente.objects.get(id=1)
 
-        res = self.client.get(f'{self.url}1/')
+        res = self.client.get(f'{url}1/')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.json(), model_to_dict(cliente1))
 
 
 class UpdateClienteTests(APITestCase):
-    def setUp(self) -> None:
-        self.url = reverse('cliente-list')
-
-        cliente1 = dict(
-            nome='Cliente1',
-            email='cliente1@cliente.com.br',
+    @classmethod
+    def setUpTestData(cls) -> None:
+        make_cliente(
             telefone='(24) 99999-9999'
         )
-
-        Cliente.objects.create(**cliente1)
 
     def test_deve_atualizar_todos_os_campos_do_cliente(self):
 
@@ -182,14 +161,16 @@ class UpdateClienteTests(APITestCase):
             telefone='(22) 99999-9999',
         )
 
-        res = self.client.put(self.url + '1/', cliente_update)
+        res = self.client.put(url + '1/', cliente_update)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
         self.assertEqual(cliente_update['nome'], Cliente.objects.get().nome)
-        self.assertEqual(cliente_update['email'],
-                         Cliente.objects.get().email)
-        self.assertEqual(cliente_update['telefone'],
-                         Cliente.objects.get().telefone)
+        self.assertEqual(
+            cliente_update['email'],
+            Cliente.objects.get().email)
+        self.assertEqual(
+            cliente_update['telefone'],
+            Cliente.objects.get().telefone)
 
     def test_deve_atualizar_um_campo_do_cliente(self):
 
@@ -197,7 +178,23 @@ class UpdateClienteTests(APITestCase):
             nome=fake.name()
         )
 
-        res = self.client.patch(self.url + '1/', cliente_update)
+        res = self.client.patch(url + '1/', cliente_update)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(cliente_update['nome'],
-                         Cliente.objects.get().nome)
+        self.assertEqual(
+            cliente_update['nome'],
+            Cliente.objects.get().nome
+        )
+
+
+class DeleteClienteTests(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        make_cliente()
+
+    def test_deve_deletar_um_cliente(self):
+        res = self.client.delete(url + '1/')
+
+        clientes = Cliente.objects.all()
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(clientes), 0)

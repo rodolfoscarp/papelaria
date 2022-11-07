@@ -105,17 +105,11 @@ def make_item_venda(
     if not percentual_comissao:
         percentual_comissao = produto.percentual_comissao
 
-    if not valor_unitario:
-        valor_unitario = fake.pyfloat(
-            left_digits=2, right_digits=2,
-            positive=True
-        ),
-
     return ItemVenda.objects.create(
-        venda,
-        produto,
-        quantidade,
-        percentual_comissao,
+        venda=venda,
+        produto=produto,
+        quantidade=quantidade,
+        percentual_comissao=percentual_comissao,
     )
 
 

@@ -4,15 +4,17 @@ from rest_framework import status
 from vendedor.models import Vendedor
 from django.forms.models import model_to_dict
 from faker import Faker
+from .dummies import make_vendedor
 
 fake = Faker(locale='pt_BR')
+
+url = reverse('vendedor-list')
 
 
 class CreateVendedorTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.url = reverse('vendedor-list')
         cls.nome = fake.name()
         cls.email = fake.email()
         cls.telefone = '(21) 99999-9999'
@@ -25,7 +27,7 @@ class CreateVendedorTests(APITestCase):
             telefone=self.telefone,
         )
 
-        res = self.client.post(self.url, vendedor, format='json')
+        res = self.client.post(url, vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(vendedor['nome'], Vendedor.objects.get().nome)
@@ -38,7 +40,7 @@ class CreateVendedorTests(APITestCase):
             telefone=self.telefone,
         )
 
-        res = self.client.post(self.url, vendedor, format='json')
+        res = self.client.post(url, vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -49,7 +51,7 @@ class CreateVendedorTests(APITestCase):
             telefone=self.telefone,
         )
 
-        res = self.client.post(self.url, vendedor, format='json')
+        res = self.client.post(url, vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -59,7 +61,7 @@ class CreateVendedorTests(APITestCase):
             email=self.email,
         )
 
-        res = self.client.post(self.url, vendedor, format='json')
+        res = self.client.post(url, vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -70,7 +72,7 @@ class CreateVendedorTests(APITestCase):
             telefone=''
         )
 
-        res = self.client.post(self.url, vendedor, format='json')
+        res = self.client.post(url, vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -81,7 +83,7 @@ class CreateVendedorTests(APITestCase):
             telefone='55885588',
         )
 
-        res = self.client.post(self.url, vendedor, format='json')
+        res = self.client.post(url, vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -91,7 +93,7 @@ class CreateVendedorTests(APITestCase):
             email=self.email,
         )
 
-        res = self.client.post(self.url, vendedor, format='json')
+        res = self.client.post(url, vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -102,7 +104,7 @@ class CreateVendedorTests(APITestCase):
             email=''
         )
 
-        res = self.client.post(self.url, vendedor, format='json')
+        res = self.client.post(url, vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -113,49 +115,30 @@ class CreateVendedorTests(APITestCase):
             telefone=self.telefone,
         )
 
-        res = self.client.post(self.url, vendedor, format='json')
+        res = self.client.post(url, vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class ListVendedorTests(APITestCase):
-    def setUp(self) -> None:
-        self.url = reverse('vendedor-list')
 
-        self.vendedor1 = dict(
-            nome=fake.name(),
-            email=fake.email(),
-            telefone='(21) 99999-9999'
-        )
-
-        self.vendedor2 = dict(
-            nome=fake.name(),
-            email=fake.email(),
-            telefone='(22) 99999-9999'
-        )
-
-        self.vendedor3 = dict(
-            nome=fake.name(),
-            email=fake.email(),
-            telefone='(23) 99999-9999'
-        )
-
-        Vendedor.objects.create(**self.vendedor1)
-        Vendedor.objects.create(**self.vendedor2)
-        Vendedor.objects.create(**self.vendedor3)
+    @classmethod
+    def setUpTestData(cls) -> None:
+        for _ in range(5):
+            make_vendedor()
 
     def test_deve_listar_todos_os_vendedores_cadastrados(self):
-        vendedores = self.client.get(self.url)
+        vendedores = self.client.get(url)
 
         vendedores_result = vendedores.json()['results']
 
         self.assertEqual(vendedores.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(vendedores_result), 3)
+        self.assertEqual(len(vendedores_result), 5)
 
     def test_deve_listar_um_vendedor(self):
         vendedor = Vendedor.objects.get(id=1)
 
-        res = self.client.get(f'{self.url}1/')
+        res = self.client.get(f'{url}1/')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.json(), model_to_dict(vendedor))
@@ -165,12 +148,7 @@ class UpdateVendedorTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-
-        cls.url = reverse('vendedor-list')
-
-        Vendedor.objects.create(
-            nome=fake.name(),
-            email=fake.email(),
+        make_vendedor(
             telefone='(21) 99999-9999'
         )
 
@@ -182,7 +160,7 @@ class UpdateVendedorTests(APITestCase):
             telefone='(22) 99999-9999',
         )
 
-        res = self.client.put(self.url + '1/', vendedor, format='json')
+        res = self.client.put(url + '1/', vendedor, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -200,6 +178,20 @@ class UpdateVendedorTests(APITestCase):
         )
 
         res = self.client.patch(
-            self.url + '1/', vendedor_update, format='json')
+            url + '1/', vendedor_update, format='json')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(vendedor_update['nome'], Vendedor.objects.get().nome)
+
+
+class DeleteVendedorTests(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        make_vendedor()
+
+    def test_deve_deletar_um_vendedor(self):
+        res = self.client.delete(url + '1/')
+
+        vendedores = Vendedor.objects.all()
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(vendedores), 0)
