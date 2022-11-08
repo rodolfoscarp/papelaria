@@ -5,4 +5,4 @@ from .serializers import VendaSerializer
 
 class VendaViewSet(viewsets.ModelViewSet):
     serializer_class = VendaSerializer
-    queryset = Venda.objects.all()
+    queryset = Venda.objects.all().order_by('-pk')

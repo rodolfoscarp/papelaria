@@ -138,9 +138,11 @@ class ListClienteTests(APITestCase):
         self.assertEqual(len(clientes_result), 5)
 
     def test_deve_listar_um_cliente(self):
-        cliente1 = Cliente.objects.get(id=1)
+        cliente1 = Cliente.objects.first()
 
-        res = self.client.get(f'{url}1/')
+        pk = cliente1.pk
+
+        res = self.client.get(f'{url}{pk}/')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.json(), model_to_dict(cliente1))
@@ -149,11 +151,13 @@ class ListClienteTests(APITestCase):
 class UpdateClienteTests(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        make_cliente(
+        cls.cliente = make_cliente(
             telefone='(24) 99999-9999'
         )
 
     def test_deve_atualizar_todos_os_campos_do_cliente(self):
+
+        pk = self.cliente.pk
 
         cliente_update = dict(
             nome=fake.name(),
@@ -161,7 +165,7 @@ class UpdateClienteTests(APITestCase):
             telefone='(22) 99999-9999',
         )
 
-        res = self.client.put(url + '1/', cliente_update)
+        res = self.client.put(url + f'{pk}/', cliente_update)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
         self.assertEqual(cliente_update['nome'], Cliente.objects.get().nome)
@@ -174,11 +178,13 @@ class UpdateClienteTests(APITestCase):
 
     def test_deve_atualizar_um_campo_do_cliente(self):
 
+        pk = self.cliente.pk
+
         cliente_update = dict(
             nome=fake.name()
         )
 
-        res = self.client.patch(url + '1/', cliente_update)
+        res = self.client.patch(url + f'{pk}/', cliente_update)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(
             cliente_update['nome'],
@@ -189,10 +195,12 @@ class UpdateClienteTests(APITestCase):
 class DeleteClienteTests(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        make_cliente()
+        cls.cliente = make_cliente()
 
     def test_deve_deletar_um_cliente(self):
-        res = self.client.delete(url + '1/')
+
+        pk = self.cliente.pk
+        res = self.client.delete(url + f'{pk}/')
 
         clientes = Cliente.objects.all()
 

@@ -10,10 +10,13 @@ url = reverse('venda-list')
 class DeleteVendedorTests(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        make_venda()
+        cls.venda = make_venda()
 
     def test_deve_deletar_um_vendedor(self):
-        res_delete = self.client.delete(url + '1/')
+
+        pk = self.venda.pk
+
+        res_delete = self.client.delete(url + f'{pk}/')
 
         vendas = Venda.objects.all()
         items_venda = ItemVenda.objects.all()

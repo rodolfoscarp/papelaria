@@ -5,4 +5,4 @@ from .models import Produto
 
 class ProdutoViewSet(viewsets.ModelViewSet):
     serializer_class = ProdutoSerializer
-    queryset = Produto.objects.all()
+    queryset = Produto.objects.all().order_by('-pk')

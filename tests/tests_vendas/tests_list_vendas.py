@@ -25,10 +25,12 @@ class ListVendaTests(APITestCase):
         self.assertEqual(len(vendas_result), 5)
 
     def test_deve_listar_uma_venda(self):
-        venda = Venda.objects.get(numero_nota=1)
+        venda = Venda.objects.first()
         item_venda = ItemVenda.objects.filter(venda=venda).first()
 
-        res = self.client.get(f'{url}1/')
+        pk = venda.pk
+
+        res = self.client.get(f'{url}{pk}/')
 
         venda_result = res.json()
 

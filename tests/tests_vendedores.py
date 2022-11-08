@@ -15,8 +15,8 @@ class CreateVendedorTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.nome = fake.name()
-        cls.email = fake.email()
+        cls.nome = str(fake.name())
+        cls.email = str(fake.email())
         cls.telefone = '(21) 99999-9999'
 
     def test_deve_cadastra_novo_vendedor(self):
@@ -136,9 +136,11 @@ class ListVendedorTests(APITestCase):
         self.assertEqual(len(vendedores_result), 5)
 
     def test_deve_listar_um_vendedor(self):
-        vendedor = Vendedor.objects.get(id=1)
 
-        res = self.client.get(f'{url}1/')
+        vendedor = Vendedor.objects.first()
+        pk = vendedor.pk
+
+        res = self.client.get(f'{url}{pk}/')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.json(), model_to_dict(vendedor))
@@ -148,11 +150,13 @@ class UpdateVendedorTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        make_vendedor(
+        cls.vendedor = make_vendedor(
             telefone='(21) 99999-9999'
         )
 
     def test_deve_atualizar_todos_os_campos_do_vendedor(self):
+
+        pk = self.vendedor.pk
 
         vendedor = dict(
             nome=fake.name(),
@@ -160,7 +164,7 @@ class UpdateVendedorTests(APITestCase):
             telefone='(22) 99999-9999',
         )
 
-        res = self.client.put(url + '1/', vendedor, format='json')
+        res = self.client.put(url + f'{pk}/', vendedor)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -174,11 +178,13 @@ class UpdateVendedorTests(APITestCase):
     def test_deve_atualizar_um_campo_do_vendedor(self):
 
         vendedor_update = dict(
-            nome=fake.name()
+            nome=str(fake.name())
         )
 
+        pk = self.vendedor.pk
+
         res = self.client.patch(
-            url + '1/', vendedor_update, format='json')
+            url + f'{pk}/', vendedor_update, format='json')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(vendedor_update['nome'], Vendedor.objects.get().nome)
 
@@ -186,10 +192,12 @@ class UpdateVendedorTests(APITestCase):
 class DeleteVendedorTests(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        make_vendedor()
+        cls.vendedor = make_vendedor()
 
     def test_deve_deletar_um_vendedor(self):
-        res = self.client.delete(url + '1/')
+        pk = self.vendedor.pk
+
+        res = self.client.delete(url + f'{pk}/')
 
         vendedores = Vendedor.objects.all()
 

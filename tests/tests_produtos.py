@@ -116,9 +116,11 @@ class ListProdutoTests(APITestCase):
         self.assertEqual(len(produtos_result), 5)
 
     def test_deve_listar_um_produto(self):
-        produto = Produto.objects.get(codigo=1)
+        produto = Produto.objects.first()
 
-        res = self.client.get(f'{url}1/')
+        pk = produto.pk
+
+        res = self.client.get(f'{url}{pk}/')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.json(), model_to_dict(produto))
@@ -131,10 +133,13 @@ class UpdateProdutoTests(APITestCase):
 class DeleteProdutoTests(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        make_produto()
+        cls.produto = make_produto()
 
     def test_deve_deletar_um_produto(self):
-        res = self.client.delete(url + '1/')
+
+        pk = self.produto.pk
+
+        res = self.client.delete(url + f'{pk}/')
 
         produtos = Produto.objects.all()
 

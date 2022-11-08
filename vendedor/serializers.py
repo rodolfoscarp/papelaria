@@ -4,7 +4,7 @@ from venda.models import Venda
 from django.db.models import Sum, F
 
 
-class VendedorViewSet(serializers.ModelSerializer):
+class VendedorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendedor
         fields = '__all__'

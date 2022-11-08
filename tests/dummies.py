@@ -5,10 +5,11 @@ from venda.models import Venda, ItemVenda, PercentualComissao
 from faker import Faker
 fake = Faker(locale='pt_BR')
 from datetime import datetime
+from django.utils import timezone
 
 
 def fake_telefone():
-    phone = fake.msisdn()
+    phone = str(fake.msisdn())
 
     return '({}) {}-{}'.format(
         phone[2:4],
@@ -27,17 +28,17 @@ def make_produto(
         descricao = 'Produto1'
 
     if not valor_unitario:
-        valor_unitario = fake.pyfloat(
+        valor_unitario = float(fake.pyfloat(
             left_digits=2, right_digits=2,
             positive=True
-        )
+        ))
 
     if not percentual_comissao:
-        percentual_comissao = fake.pyfloat(
+        percentual_comissao = float(fake.pyfloat(
             left_digits=0, right_digits=2,
             positive=True, min_value=0.01,
             max_value=0.10
-        )
+        ))
 
     return Produto.objects.create(
         descricao=descricao,
@@ -53,10 +54,10 @@ def make_cliente(
 ):
 
     if not nome:
-        nome = fake.name
+        nome = str(fake.name())
 
     if not email:
-        email = fake.email
+        email = str(fake.email())
 
     if not telefone:
         telefone = fake_telefone()
@@ -74,10 +75,10 @@ def make_vendedor(
     telefone=None
 ):
     if not nome:
-        nome = fake.name
+        nome = str(fake.name())
 
     if not email:
-        email = fake.email
+        email = str(fake.email())
 
     if not telefone:
         telefone = fake_telefone()
@@ -100,7 +101,7 @@ def make_item_venda(
         produto = make_produto()
 
     if not quantidade:
-        quantidade = fake.pyint(min_value=0, max_value=10)
+        quantidade = int(fake.pyint(min_value=0, max_value=10))
 
     if not percentual_comissao:
         percentual_comissao = produto.percentual_comissao
@@ -134,7 +135,7 @@ def make_venda(
 ):
 
     if not data_hora:
-        data_hora = datetime.now()
+        data_hora = timezone.now()
 
     if not cliente:
         cliente = make_cliente()

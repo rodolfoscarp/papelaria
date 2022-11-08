@@ -1,18 +1,15 @@
 from rest_framework import viewsets
-from .serializers import VendedorViewSet, ComissaoSerializer
+from .serializers import VendedorSerializer, ComissaoSerializer
 from .models import Vendedor
 from rest_framework.generics import ListAPIView
 
 
 class VendedorViewSet(viewsets.ModelViewSet):
-    serializer_class = VendedorViewSet
-    queryset = Vendedor.objects.all()
+    serializer_class = VendedorSerializer
+    queryset = Vendedor.objects.all().order_by('-pk')
 
 
 class ComissaoListView(ListAPIView):
 
     serializer_class = ComissaoSerializer
-    queryset = Vendedor.objects.all()
-
-    # filter_backends = [DjangoFilterBackend]
-    # filterset_fields = ['category', 'in_stock']
+    queryset = Vendedor.objects.all().order_by('-pk')
