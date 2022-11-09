@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Vendedor
-from venda.models import Venda
-from django.db.models import Sum, F
+from venda.models import Venda, ItemVenda
 
 
 class VendedorSerializer(serializers.ModelSerializer):
@@ -10,24 +9,36 @@ class VendedorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ComissaoVendaItemSerializer(serializers.ModelSerializer):
+
+    quantidade = serializers.IntegerField()
+    percentual_comissao = serializers.FloatField()
+    produto = serializers.CharField(source='produto.descricao')
+    valor_unitario = serializers.FloatField(source='produto.valor_unitario')
+
+    class Meta:
+        model = ItemVenda
+        fields = [
+            'quantidade', 'percentual_comissao',
+            'produto', 'valor_unitario'
+        ]
+
+
+class ComissaoVendaSerializer(serializers.ModelSerializer):
+    data_hora = serializers.DateTimeField()
+    items = ComissaoVendaItemSerializer(many=True)
+
+    class Meta:
+        model = Venda
+        fields = ['data_hora', 'items']
+
+
 class ComissaoSerializer(serializers.ModelSerializer):
-    cod = serializers.IntegerField(source='pk')
+
+    pk = serializers.IntegerField()
     nome = serializers.CharField()
-    total_vendas = serializers.SerializerMethodField('get_total_vendas')
-    total_comissao = serializers.SerializerMethodField(
-        'get_total_comissao')
+    vendas = ComissaoVendaSerializer(many=True)
 
     class Meta:
         model = Vendedor
-        fields = ['cod', 'nome', 'total_vendas', 'total_comissao']
-
-    def get_total_vendas(self, obj):
-        vendas = Venda.objects.filter(vendedor=obj.pk)
-        return vendas.count()
-
-    def get_total_comissao(self, obj):
-        total_comissao = Venda.objects.filter(vendedor=obj.pk).annotate(comissao=F(
-            'items__produto__valor_unitario') * F('items__quantidade') * F('items__percentual_comissao')).aggregate(
-                Sum('comissao'))
-
-        return total_comissao['comissao__sum']
+        fields = ['pk', 'nome', 'vendas']

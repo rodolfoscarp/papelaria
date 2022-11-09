@@ -1,6 +1,6 @@
-from rest_framework import viewsets
 from .models import Venda
 from .serializers import VendaSerializer
+from rest_framework import viewsets
 
 
 class VendaViewSet(viewsets.ModelViewSet):

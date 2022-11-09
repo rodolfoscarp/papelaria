@@ -27,7 +27,8 @@ schema_view = swagger_get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('comissao/', ComissaoListView.as_view(), name='comissao'),
+    path('comissao/',
+         ComissaoListView.as_view({'get': 'list'}), name='comissao'),
     path('', include(router.urls)),
     path(
         'doc/', schema_view.with_ui('swagger', cache_timeout=0),
